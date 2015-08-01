@@ -30,6 +30,7 @@ namespace OnibusWPhone
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private BasicGeoposition minhaLocalizacao = new BasicGeoposition();
         public MainPage()
         {
             this.InitializeComponent();
@@ -62,81 +63,97 @@ namespace OnibusWPhone
 
         private async void btnBuscar_Click(object sender, RoutedEventArgs e)
         {
-            string numeroLinha = txtNumero.Text;
-            var task = RequestAPI.GetString("http://192.168.0.12/OnibusAPI/api/onibus/getOnibusOpen?numeroLinha=" + numeroLinha);
-            var items = await task;
-            List<Onibus> lstOnibus = (List<Onibus>)items;
-            AddPins(lstOnibus);
+            try
+            {
+                string numeroLinha = txtNumero.Text;
+                string url = RequestAPI.getUrl(numeroLinha, minhaLocalizacao.Latitude, minhaLocalizacao.Longitude);
+                var task = RequestAPI.GetString(url);
+                var items = await task;
+                List<Onibus> lstOnibus = (List<Onibus>)items;
+                AddPins(lstOnibus);
+            }
+            catch { }
         }
+        
         private async void PinMyLocation() 
         {
-            var geolocator = new Geolocator();
-            geolocator.DesiredAccuracyInMeters = 100;
-            Geoposition position = await geolocator.GetGeopositionAsync();
-
-            // reverse geocoding
-            BasicGeoposition myLocation = new BasicGeoposition
+            try
             {
-                Longitude = position.Coordinate.Longitude,
-                Latitude = position.Coordinate.Latitude
-            };
+                var geolocator = new Geolocator();
+                geolocator.DesiredAccuracyInMeters = 100;
+                Geoposition position = await geolocator.GetGeopositionAsync();
 
-            MapIcon MapIcon1 = new MapIcon();
-            MapIcon1.Location = new Geopoint(new BasicGeoposition()
-            {
-                Latitude = myLocation.Latitude,
-                Longitude = myLocation.Longitude
-            });
-            MapIcon1.NormalizedAnchorPoint = new Point(0.5, 1.0);
-            MapIcon1.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/voce.png"));
-            MapIcon1.Title = "VOCE ESTA AQUI";
-
-            myMap.MapElements.Add(MapIcon1);
-            myMap.Center = new Geopoint(new BasicGeoposition()
-            {
-                Latitude = myLocation.Latitude,
-                Longitude = myLocation.Longitude
-            });
-            myMap.ZoomLevel = 15;
-            Geopoint pointToReverseGeocode = new Geopoint(myLocation);
-
-            MapLocationFinderResult result = await MapLocationFinder.FindLocationsAtAsync(pointToReverseGeocode);
-
-            // here also it should be checked if there result isn't null and what to do in such a case
-            string country = result.Locations[0].Address.Country;
-        }
-        private async void AddPins(List<Onibus> lstOnibus)
-        {
-            foreach (Onibus item in lstOnibus)
-            {
-                MapIcon MapIcon1 = new MapIcon();
-                BasicGeoposition position = new BasicGeoposition()
+                // reverse geocoding
+                BasicGeoposition myLocation = new BasicGeoposition
                 {
-                    Latitude = item.Latitude,
-                    Longitude = item.Longitude
+                    Longitude = position.Coordinate.Longitude,
+                    Latitude = position.Coordinate.Latitude
                 };
-                MapIcon1.Location = new Geopoint(position);
-                MapIcon1.NormalizedAnchorPoint = new Point(0.5, 1.0);
-                MapIcon1.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/busRed.png"));
-                try
+                minhaLocalizacao = myLocation;
+                MapIcon MapIcon1 = new MapIcon();
+                MapIcon1.Location = new Geopoint(new BasicGeoposition()
                 {
-                    Geopoint pointToReverseGeocode = new Geopoint(position);
-
-                    MapLocationFinderResult result = await MapLocationFinder.FindLocationsAtAsync(pointToReverseGeocode);
-
-                    MapIcon1.Title = "Onibus " + item.Linha + " Numero: " + item.Ordem + " Localizacao : " + result.Locations[0].Address.Street + " " + result.Locations[0].Address.StreetNumber + " " + result.Locations[0].Address.Neighborhood + " " + result.Locations[0].Address.Region;
-                }
-                catch { MapIcon1.Title = "Onibus " + item.Linha + " Numero: " + item.Ordem; }
-                
+                    Latitude = myLocation.Latitude,
+                    Longitude = myLocation.Longitude
+                });
+                MapIcon1.NormalizedAnchorPoint = new Point(0.5, 1.0);
+                MapIcon1.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/voce.png"));
+                MapIcon1.Title = "VOCE ESTA AQUI";
 
                 myMap.MapElements.Add(MapIcon1);
                 myMap.Center = new Geopoint(new BasicGeoposition()
                 {
-                    Latitude = item.Latitude,
-                    Longitude = item.Longitude
+                    Latitude = myLocation.Latitude,
+                    Longitude = myLocation.Longitude
                 });
+                myMap.ZoomLevel = 15;
+                Geopoint pointToReverseGeocode = new Geopoint(myLocation);
+
+                MapLocationFinderResult result = await MapLocationFinder.FindLocationsAtAsync(pointToReverseGeocode);
+
+                // here also it should be checked if there result isn't null and what to do in such a case
+                string country = result.Locations[0].Address.Country;
             }
-            myMap.ZoomLevel = 15;
+            catch { }
+        }
+        private async void AddPins(List<Onibus> lstOnibus)
+        {
+            try
+            {
+                myMap.ZoomLevel = 10;
+                foreach (Onibus item in lstOnibus)
+                {
+                    MapIcon MapIcon1 = new MapIcon();
+                    BasicGeoposition position = new BasicGeoposition()
+                    {
+                        Latitude = item.Latitude,
+                        Longitude = item.Longitude
+                    };
+                    MapIcon1.Location = new Geopoint(position);
+                    MapIcon1.NormalizedAnchorPoint = new Point(0.5, 1.0);
+                    MapIcon1.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/busRed.png"));
+                    try
+                    {
+                        Geopoint pointToReverseGeocode = new Geopoint(position);
+
+                        MapLocationFinderResult result = await MapLocationFinder.FindLocationsAtAsync(pointToReverseGeocode);
+
+                        MapIcon1.Title = "Onibus " + item.Linha + " Numero: " + item.Ordem + "\nHora :" + item.DataHora.ToString("HH:mm") + " Localizacao : " + result.Locations[0].Address.Street + " " + result.Locations[0].Address.StreetNumber + " " + result.Locations[0].Address.Neighborhood + " " + result.Locations[0].Address.Region;
+                    }
+                    catch { MapIcon1.Title = "Onibus " + item.Linha + " Numero: " + item.Ordem; }
+
+
+                    myMap.MapElements.Add(MapIcon1);
+                    myMap.Center = new Geopoint(new BasicGeoposition()
+                    {
+                        Latitude = item.Latitude,
+                        Longitude = item.Longitude
+                    });
+                }
+                PinMyLocation();
+                myMap.ZoomLevel = 15;
+            }
+            catch { }
         }
     }
 }

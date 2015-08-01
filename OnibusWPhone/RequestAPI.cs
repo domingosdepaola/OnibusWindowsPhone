@@ -13,10 +13,14 @@ namespace OnibusWPhone
 {
     public class RequestAPI
     {
-        private string url = "http://192.168.0.12/OnibusAPI/api/onibus/getOnibusOpen?numeroLinha=";
+        string url = "";
         bool TerminouRequisicao = false;
         List<Onibus> listaDados = new List<Onibus>();
-
+        public static string getUrl(string numeroLinha,double latitude,double longitude)
+        {
+            string urlPadrao = "http://www.localizadordeonibus.com.br/OnibusWebAPI/api/onibus/getOnibusWP?x=" + numeroLinha + "&y=" + latitude.ToString() + "&z=" + longitude.ToString();
+            return urlPadrao;
+        }
         public static async Task<String> GetResponse(string caminhoURl)
         {
             try
