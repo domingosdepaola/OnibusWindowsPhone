@@ -10,6 +10,7 @@ using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Services.Maps;
 using Windows.Storage.Streams;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Maps;
@@ -65,14 +66,38 @@ namespace OnibusWPhone
         {
             try
             {
-                string numeroLinha = txtNumero.Text;
-                string url = RequestAPI.getUrl(numeroLinha, minhaLocalizacao.Latitude, minhaLocalizacao.Longitude);
-                var task = RequestAPI.GetString(url);
-                var items = await task;
-                List<Onibus> lstOnibus = (List<Onibus>)items;
-                AddPins(lstOnibus);
+                MessageDialog msg = new MessageDialog("Entre com o numero da linha");
+                imgAguarde.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                if (txtNumero.Text != "")
+                {
+                    string numeroLinha = txtNumero.Text;
+                    string url = RequestAPI.getUrl(numeroLinha, minhaLocalizacao.Latitude, minhaLocalizacao.Longitude);
+                    var task = RequestAPI.GetString(url);
+                    var items = await task;
+                    List<Onibus> lstOnibus = (List<Onibus>)items;
+                    imgAguarde.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    if (lstOnibus.Count > 0)
+                    {
+                        AddPins(lstOnibus);
+                    }
+                    else
+                    {
+                        msg = new MessageDialog("Nenhum resultado");
+                        await msg.ShowAsync();
+                    }
+                }
+                else
+                {
+                    msg = new MessageDialog("Entre com o numero da linha");
+                    await msg.ShowAsync();
+                }
+
             }
             catch { }
+            finally 
+            {
+                imgAguarde.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+            }
         }
         
         private async void PinMyLocation() 
@@ -120,6 +145,7 @@ namespace OnibusWPhone
         {
             try
             {
+                myMap.MapElements.Clear();
                 myMap.ZoomLevel = 10;
                 foreach (Onibus item in lstOnibus)
                 {

@@ -95,9 +95,12 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\aguarde11.gif" />
     <Content Include="Assets\bus.png" />
     <Content Include="Assets\busRed.png" />
+    <Content Include="Assets\carregandoWindows.png" />
     <Content Include="Assets\Logo.scale-240.png" />
+    <Content Include="Assets\processando.gif" />
     <Content Include="Assets\SmallLogo.scale-240.png" />
     <Content Include="Assets\SplashScreen.scale-240.png" />
     <Content Include="Assets\Square71x71Logo.scale-240.png" />

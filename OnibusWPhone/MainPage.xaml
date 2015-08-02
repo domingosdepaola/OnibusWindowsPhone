@@ -10,7 +10,10 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock x:Name="lblLinha" Text="Digite o numero do onibus e clique em buscar" FontSize="18" /> <TextBox x:Name="txtNumero" Width="90" Margin="0,30,0,0" HorizontalAlignment="Left" /><Button VerticalAlignment="Top" x:Name="btnBuscar" Margin="100,20,0,0" Click="btnBuscar_Click" Content="Buscar" />
-       <Maps:MapControl MapServiceToken="vmMhyZ2UupaO3tNuvI6Z~gdj0sohQ6QzinHAc5YBFag~AvwqsOSkSCcLlqxLF1SMTviRs3x-nSyiyluiyIYQ1jJUq3iFZndctpW7gyfjichu" x:Name="myMap" HorizontalAlignment="Left" Width="400" Height="560" Margin="0,0,0,0" VerticalAlignment="Bottom"/>
+        <TextBlock x:Name="lblLinha" Text="Digite o numero do onibus e clique em buscar" FontSize="18" />
+        <TextBox x:Name="txtNumero" Canvas.ZIndex="9999" Width="90" Margin="0,30,0,0" HorizontalAlignment="Left" />
+        <Button VerticalAlignment="Top" x:Name="btnBuscar" Margin="100,20,0,0" Click="btnBuscar_Click" Canvas.ZIndex="9999" Content="Buscar" />
+        <Image Source="Assets/carregandoWindows.png" Canvas.ZIndex="99999" x:Name="imgAguarde" VerticalAlignment="Center" Visibility="Collapsed" HorizontalAlignment="Center" Margin="0,0,0,0" />
+        <Maps:MapControl MapServiceToken="vmMhyZ2UupaO3tNuvI6Z~gdj0sohQ6QzinHAc5YBFag~AvwqsOSkSCcLlqxLF1SMTviRs3x-nSyiyluiyIYQ1jJUq3iFZndctpW7gyfjichu" x:Name="myMap" Canvas.ZIndex="1" Margin="0,74,0,0" />
     </Grid>
 </Page>
